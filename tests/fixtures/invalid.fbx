@@ -1,0 +1,5 @@
+; 故意截断的正式反例，解析失败不能产生部分 Scene。
+FBXHeaderExtension: {
+    FBXVersion: 7400
+Objects: {
+    Geometry: 1, "Geometry::broken", "Mesh" {

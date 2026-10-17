@@ -1,0 +1,43 @@
+# 世界共享目录由对象显式引用，场景仅持有作者对象。
+format_version: 1
+id: "cornell-workbench"
+name: "Cornell 工作空间"
+default_scene_id: "cornell"
+materials { id:"white" name:"中性墙面" parameters { base_roughness { x:0.73 y:0.73 z:0.73 w:0.78 } } }
+materials { id:"red" name:"红色墙面" parameters { base_roughness { x:0.65 y:0.055 z:0.045 w:0.82 } } }
+materials { id:"green" name:"绿色墙面" parameters { base_roughness { x:0.085 y:0.52 z:0.12 w:0.82 } } }
+materials { id:"emitter" name:"暖色发光面" parameters { base_roughness { x:1 y:0.92 z:0.78 w:0.65 } emission_metallic { x:1 y:0.92 z:0.78 } } }
+materials { id:"coated" name:"清漆暖灰" parameters { base_roughness { x:0.78 y:0.74 z:0.64 w:0.42 } emission_metallic { w:0.1 } transmission_ior { y:1.5 z:0.08 } } }
+materials { id:"metal" name:"银灰金属" parameters { base_roughness { x:0.68 y:0.71 z:0.76 w:0.2 } emission_metallic { w:0.72 } } }
+# 房间与盒体均使用通用原语；尺寸、绕序与姿态完全属于配置。
+meshes { id:"floor" name:"地面" quad { a{x:-1.4 z:-1.4} b{x:-1.4 z:1.4} c{x:1.4 z:1.4} d{x:1.4 z:-1.4} } }
+meshes { id:"ceiling" name:"天花板" quad { a{x:-1.4 y:2.8 z:-1.4} b{x:1.4 y:2.8 z:-1.4} c{x:1.4 y:2.8 z:1.4} d{x:-1.4 y:2.8 z:1.4} } }
+meshes { id:"left-wall" name:"左墙" quad { a{x:-1.4 z:-1.4} b{x:-1.4 y:2.8 z:-1.4} c{x:-1.4 y:2.8 z:1.4} d{x:-1.4 z:1.4} } }
+meshes { id:"right-wall" name:"右墙" quad { a{x:1.4 z:1.4} b{x:1.4 y:2.8 z:1.4} c{x:1.4 y:2.8 z:-1.4} d{x:1.4 z:-1.4} } }
+meshes { id:"back-wall" name:"后墙" quad { a{x:-1.4 z:1.4} b{x:-1.4 y:2.8 z:1.4} c{x:1.4 y:2.8 z:1.4} d{x:1.4 z:1.4} } }
+meshes { id:"light-panel" name:"灯板" quad { a{x:-0.45 y:2.74 z:-0.45} b{x:0.45 y:2.74 z:-0.45} c{x:0.45 y:2.74 z:0.45} d{x:-0.45 y:2.74 z:0.45} } }
+meshes { id:"small-box" name:"矮盒体" box { size {x:0.82 y:0.86 z:0.82} } }
+meshes { id:"tall-box" name:"高盒体" box { size {x:0.82 y:1.52 z:0.82} } }
+levels {
+  id:"main-level" name:"主关卡"
+  scenes {
+    id:"cornell" name:"Cornell 房间"
+    objects { id:"cornell.floor" name:"地面" mesh_id:"floor" material_id:"white" }
+    objects { id:"cornell.ceiling" name:"天花板" mesh_id:"ceiling" material_id:"white" }
+    objects { id:"cornell.left" name:"红色左墙" mesh_id:"left-wall" material_id:"red" }
+    objects { id:"cornell.right" name:"绿色右墙" mesh_id:"right-wall" material_id:"green" }
+    objects { id:"cornell.back" name:"后墙" mesh_id:"back-wall" material_id:"white" }
+    objects { id:"cornell.emitter" name:"顶灯发光面" mesh_id:"light-panel" material_id:"emitter" }
+    objects { id:"cornell.small-box" name:"矮盒体" mesh_id:"small-box" material_id:"coated" transform {position{x:-0.57 z:-0.12} rotation_degrees{y:-13.750987} } }
+    objects { id:"cornell.tall-box" name:"高盒体" mesh_id:"tall-box" material_id:"metal" transform {position{x:0.49 z:0.42} rotation_degrees{y:16.042818} } }
+    objects { id:"cornell.camera" name:"主摄像机" transform {position{y:1.4 z:-4.6}} camera {} }
+    objects { id:"cornell.light" name:"顶灯" transform {position{y:2.74}} light {color{x:1 y:0.94 z:0.84} emitter_object_id:"cornell.emitter"} }
+  }
+  scenes {
+    id:"material-lab" name:"材质实验室"
+    objects { id:"lab.floor" name:"实验室地面" mesh_id:"floor" material_id:"white" }
+    objects { id:"lab.box" name:"金属样件" mesh_id:"tall-box" material_id:"metal" transform {position{z:0.25} rotation_degrees{y:25}} }
+    objects { id:"lab.camera" name:"实验室摄像机" transform {position{y:1.4 z:-4.6}} camera {} }
+    objects { id:"lab.light" name:"实验室面光源" transform {position{y:2.74}} light {color{x:0.85 y:0.94 z:1} intensity:18 width:1.2 height:0.8} }
+  }
+}

@@ -1,0 +1,8 @@
+#pragma once
+#include <array>
+
+// 上游 DDS 原始数据由 CMake 生成，只读存储随 Renderer 链接到程序。
+namespace render::ltc_data {
+inline constexpr std::array<unsigned char, @LTC_MATRIX_SIZE@> LtcMatrixDds{@LTC_MATRIX_BYTES@};
+inline constexpr std::array<unsigned char, @LTC_AMPLITUDE_SIZE@> LtcAmplitudeDds{@LTC_AMPLITUDE_BYTES@};
+}

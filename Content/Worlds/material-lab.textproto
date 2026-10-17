@@ -1,0 +1,19 @@
+# 独立的第二份世界文档展示同一原语工厂与对象资源关联格式。
+format_version: 1
+id: "material-lab-world"
+name: "材质实验室独立文档"
+default_scene_id: "material-lab"
+materials { id:"neutral" name:"中性地面" parameters {base_roughness{x:0.65 y:0.68 z:0.72 w:0.8}} }
+materials { id:"metal" name:"铜色金属" parameters {base_roughness{x:0.8 y:0.42 z:0.18 w:0.25} emission_metallic{w:0.85}} }
+meshes {id:"floor" name:"实验台" quad{a{x:-2 z:-2} b{x:-2 z:2} c{x:2 z:2} d{x:2 z:-2}}}
+meshes {id:"box" name:"样件" box{size{x:1 y:1.2 z:1}}}
+levels {
+  id:"lab-level" name:"实验关卡"
+  scenes {
+    id:"material-lab" name:"材质实验室"
+    objects {id:"lab.floor" name:"实验台" mesh_id:"floor" material_id:"neutral"}
+    objects {id:"lab.sample" name:"金属样件" mesh_id:"box" material_id:"metal" transform{rotation_degrees{y:25}}}
+    objects {id:"lab.camera" name:"摄像机" transform{position{y:1.4 z:-4.6}} camera{}}
+    objects {id:"lab.light" name:"面光源" transform{position{y:2.8}} light{color{x:1 y:0.95 z:0.85} intensity:18 width:1.1 height:0.8}}
+  }
+}

@@ -1,0 +1,46 @@
+# 编译结果、依赖缓存和个人开发环境由本机生成。
+/build/
+/out/
+/output/
+/.vs/
+/.vscode/
+/CMakeUserPresets.json
+/CMakeCache.txt
+/CMakeFiles/
+/Testing/
+/*.exe
+/*.dll
+/*.pdb
+/*.ilk
+/*.exp
+/*.lib
+/imgui.ini
+
+# 角色模型原始说明禁止二次配布，原始文件及派生网格、纹理仅保留本地。
+/茜特拉莉皮肤/
+/Content/Models/Citlali/
+/Content/Worlds/citlali.pb
+
+# 保留文档中的正式截图，排除捕获日志、诊断脚本和一次性计划。
+/captures/*
+!/captures/object-palette-editor.png
+!/captures/object-palette-citlali-editor.png
+!/captures/scene-selector-editor.png
+!/captures/contact-fixed-restir.png
+!/captures/editor-ue-controls.png
+!/captures/completion-import-vsm.png
+!/captures/completion-import-editor.png
+!/captures/citlali-whole-models.png
+!/captures/citlali-whole-models-editor.png
+!/captures/integration-contact-metal-pt.png
+!/captures/integration-contact-matte-pt.png
+!/captures/editor-after-reload.png
+/docs/superpowers/plans/
+
+# 本地凭据与环境配置不进入仓库。
+.env
+.env.*
+!.env.example
+*.user
+*.suo
+*.log

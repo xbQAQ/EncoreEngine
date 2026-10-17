@@ -1,0 +1,178 @@
+syntax = "proto2";
+package render.config;
+
+// 通用数值向量供资源参数与对象变换共用，缺失分量由各消费边界补充默认值。
+message Vec3 {
+  optional float x = 1 [default = 0]; // X 分量或红色通道。
+  optional float y = 2 [default = 0]; // Y 分量或绿色通道。
+  optional float z = 3 [default = 0]; // Z 分量或蓝色通道。
+}
+message Vec4 {
+  optional float x = 1 [default = 0]; // 第一参数分量。
+  optional float y = 2 [default = 0]; // 第二参数分量。
+  optional float z = 3 [default = 0]; // 第三参数分量。
+  optional float w = 4 [default = 0]; // 第四参数分量。
+}
+message Transform {
+  optional Vec3 position = 1; // 对象的世界空间平移，单位为米。
+  optional Vec3 rotation_degrees = 2; // 按 X、Y、Z 顺序应用的欧拉角，单位为度。
+  optional Vec3 scale = 3; // 非零局部缩放；缺失分量按一处理。
+}
+message MaterialParameters {
+  optional Vec4 base_roughness = 1; // 线性基础色与粗糙度。
+  optional Vec4 emission_metallic = 2; // 自发光辐亮度与金属度。
+  optional Vec4 transmission_ior = 3; // 透射、折射率、清漆强度与清漆光泽。
+  optional Vec4 principled = 4; // 镜面强度、镜面染色、各向异性与次表面比例。
+  optional Vec4 sheen = 5; // 绒毛、绒毛染色、薄表面平坦度与漫透射。
+  optional Vec4 medium = 6; // 介质衰减色与参考距离。
+  optional Vec4 extras = 7; // 各向异性角、法线强度、透明裁剪阈值与不透明度。
+  optional Vec4 tangent_frame = 8; // 自定义切线方向与手性。
+  optional bool thin = 9 [default = false]; // 是否使用薄表面透射模型。
+  optional bool double_sided = 10 [default = false]; // 是否接受几何背面。
+  optional uint32 alpha_mode = 11 [default = 0]; // 零为不透明，一为透明裁剪。
+}
+message MaterialAsset {
+  optional string id = 1; // 世界目录内稳定且唯一的材质资源标识。
+  optional string name = 2; // 面向编辑器的材质名称。
+  optional MaterialParameters parameters = 3; // 材质的权威可编辑参数。
+  optional string script_source = 4; // 定义 Surface 函数的 HLSL 源码。
+  optional string script_path = 5; // HLSL 源文件的 UTF-8 来源路径。
+}
+message TextureAsset {
+  optional string id = 1; // 世界目录内稳定且唯一的图像资源标识。
+  optional string name = 2; // 面向编辑器的纹理名称。
+  optional uint32 width = 3; // 完整 RGBA8 图像的像素宽度。
+  optional uint32 height = 4; // 完整 RGBA8 图像的像素高度。
+  repeated fixed32 rgba = 5 [packed = true]; // 按行排列的完整 RGBA8 像素。
+  optional string source_path = 6; // 已导入图像的 UTF-8 来源路径，不参与资源所有权。
+  optional string rgba_path = 7; // 相对世界文档的外部 RGBA8 载荷路径，按行保存小端 fixed32 像素。
+}
+message TextureBinding {
+  optional uint32 slot = 1; // 对象材质的八个纹理槽之一，范围为零到七。
+  optional string texture_id = 2; // 指向世界共享目录的图像标识。
+  optional Vec4 offset_scale = 3; // UV 平移与缩放，默认值为零、零、一、一。
+  optional Vec4 rotation = 4; // UV 旋转正弦、余弦、坐标集与保留分量。
+  optional uint32 wrap_u = 5 [default = 0]; // U 方向采样：重复、镜像、夹取分别为零、一、二。
+  optional uint32 wrap_v = 6 [default = 0]; // V 方向采样：重复、镜像、夹取分别为零、一、二。
+}
+message Quad {
+  optional Vec3 a = 1; // 第一个角点，四点顺序决定法线方向。
+  optional Vec3 b = 2; // 第二个角点。
+  optional Vec3 c = 3; // 第三个角点。
+  optional Vec3 d = 4; // 第四个角点。
+}
+message Box {
+  optional Vec3 size = 1; // 正的宽、高、深；局部原点位于底面中心。
+}
+message Triangle {
+  optional Vec3 a = 1; // 第一个局部空间顶点。
+  optional Vec3 b = 2; // 第二个局部空间顶点。
+  optional Vec3 c = 3; // 第三个局部空间顶点。
+  optional uint32 attribute = 4 [default = 0]; // 一基属性索引；零表示使用几何法线与默认 UV。
+}
+message TriangleAttributes {
+  optional Vec4 normal0 = 1; // 第一个顶点的平滑法线及手性。
+  optional Vec4 normal1 = 2; // 第二个顶点的平滑法线。
+  optional Vec4 normal2 = 3; // 第三个顶点的平滑法线。
+  optional Vec4 uv01 = 4; // 前两个顶点的 UV。
+  optional Vec4 uv2 = 5; // 第三个顶点的 UV 与保留分量。
+  optional Vec4 tangent = 6; // 切线方向及 UV 手性。
+}
+message MeshData {
+  repeated Triangle triangles = 1; // 从模型导入器烘焙的不可变局部三角形。
+  repeated TriangleAttributes attributes = 2; // 保留导入法线、UV 和切线的数据。
+}
+message MeshAsset {
+  optional string id = 1; // 世界目录内稳定且唯一的网格资源标识。
+  optional string name = 2; // 面向编辑器的网格名称。
+  oneof geometry {
+    Quad quad = 3; // 通用四边形原语，不绑定任何内置场景。
+    Box box = 4; // 通用盒体原语，不绑定任何内置场景。
+    MeshData data = 5; // 已导入模型的完整几何载荷。
+  }
+  optional string source_path = 6; // 原始模型的 UTF-8 来源路径，嵌入载荷可独立读取。
+}
+message Camera {
+  optional float vertical_fov_degrees = 1 [default = 43]; // 垂直视场角，范围为零到一百八十度之间。
+  optional float near_plane = 2 [default = 0.05]; // 正的近裁剪距离。
+  optional float far_plane = 3 [default = 100]; // 大于近裁剪距离的远裁剪距离。
+  optional bool active = 4 [default = true]; // 是否参与主摄像机选择。
+}
+message Light {
+  enum Type {
+    DIRECTIONAL = 0; // 平行入射的方向光。
+    POINT = 1; // 向各方向发射的点光源。
+    RECTANGLE = 2; // 具有宽高与发射坐标系的矩形面光源。
+    DISK = 3; // 具有宽高与发射坐标系的椭圆盘面光源。
+    SPOT = 4; // 具有内外锥角的聚光灯。
+  }
+  optional Type type = 1 [default = RECTANGLE]; // 解析光源的几何类型。
+  optional Vec3 color = 2; // 线性发射颜色，缺失时使用白色。
+  optional float intensity = 3 [default = 15]; // 非负辐亮度或点光源功率。
+  optional float width = 4 [default = 0.9]; // 面光源沿局部宽轴的完整尺寸。
+  optional float height = 5 [default = 0.9]; // 面光源沿局部高轴的完整尺寸。
+  optional float range = 6 [default = 10]; // 非负影响距离；零表示不限定范围。
+  optional bool enabled = 7 [default = true]; // 是否加入渲染快照。
+  optional float source_radius = 8 [default = 0.05]; // 半影估计所用的源半径或角半径。
+  optional float outer_angle_degrees = 9 [default = 40]; // 聚光灯外锥半角。
+  optional float inner_angle_degrees = 10 [default = 25]; // 聚光灯内锥半角。
+  optional Vec3 direction = 11; // 发射方向，缺失时为负 Y。
+  optional Vec3 tangent = 12; // 面光源宽轴，缺失时为正 X。
+  optional Vec3 bitangent = 13; // 面光源高轴，缺失时为正 Z。
+  optional string emitter_object_id = 14; // 可选的同场景发光体对象引用。
+}
+message LuaScript {
+  optional string source = 1; // 定义 update(self, dt) 的 Lua 源码。
+  optional string path = 2; // Lua 源文件的 UTF-8 来源路径。
+  optional bool enabled = 3 [default = true]; // 独立于全局播放状态的脚本开关。
+}
+// 同一模型内部的材质表面按局部三角形范围绑定，几何仍由完整模型对象统一变换。
+message SurfaceMaterial {
+  optional uint32 first_triangle = 1 [default = 0]; // 相对所属对象源范围的首个三角形。
+  optional uint32 triangle_count = 2; // 当前表面连续拥有的三角形数量，必须大于零。
+  optional string material_id = 3; // 当前表面引用的世界共享材质标识。
+  repeated TextureBinding texture_bindings = 4; // 当前表面的独立纹理采样绑定。
+  optional MaterialParameters material_override = 5; // 当前表面覆盖共享材质的可编辑参数。
+  optional string material_script_source = 6; // 当前表面覆盖共享材质的 HLSL 源码。
+  optional string material_script_path = 7; // 当前表面材质脚本的 UTF-8 来源路径。
+}
+message Object {
+  optional string id = 1; // 文档内稳定且唯一的对象标识，不等同于运行时 EnTT 句柄。
+  optional string name = 2; // 编辑器显示名称。
+  optional Transform transform = 3; // 对象的权威变换。
+  optional string mesh_id = 4; // 对世界共享网格目录的引用。
+  optional string material_id = 5; // 对世界共享材质目录的引用。
+  repeated TextureBinding texture_bindings = 6; // 纹理关联归对象所有，不放入场景资源列表。
+  optional bool visible = 7 [default = true]; // 网格实例的可见性。
+  optional Camera camera = 8; // 可选的摄像机组件。
+  optional Light light = 9; // 可选的解析光源组件。
+  optional LuaScript lua = 10; // 可选的 Lua 逻辑组件。
+  optional Vec3 velocity = 11; // 可选的世界空间线速度。
+  optional uint32 first_triangle = 12 [default = 0]; // 共享网格的源三角形起点。
+  optional uint32 triangle_count = 13 [default = 0]; // 共享源范围长度；零表示从起点延伸到结尾。
+  optional MaterialParameters material_override = 14; // 对象专属材质参数覆盖，保留共享目录引用。
+  optional string material_script_source = 15; // 对象材质变体的独立 Surface 源码，缺失时继承共享材质。
+  optional string material_script_path = 16; // 对象材质变体源码的 UTF-8 来源路径。
+  repeated SurfaceMaterial surface_materials = 17; // 非空时完整覆盖模型范围，各表面保留自己的材质与贴图。
+  optional bool use_surface_materials = 18 [default = true]; // 为假时使用对象整体材质覆盖，但仍保留原始表面绑定。
+}
+message Scene {
+  optional string id = 1; // 文档内稳定且唯一的场景标识。
+  optional string name = 2; // 场景显示名称。
+  repeated Object objects = 3; // 归属本场景的对象及其资源引用。
+}
+message Level {
+  optional string id = 1; // 文档内稳定且唯一的关卡标识。
+  optional string name = 2; // 关卡显示名称。
+  repeated Scene scenes = 3; // 关卡内可独立激活的场景。
+}
+message World {
+  optional uint32 format_version = 1 [default = 1]; // 文档格式版本，当前仅接受第一版。
+  optional string id = 2; // 世界的稳定文档标识。
+  optional string name = 3; // 世界显示名称。
+  repeated Level levels = 4; // 世界拥有的关卡层级。
+  repeated MaterialAsset materials = 5; // 世界共享材质资源目录，不表示场景所有权。
+  repeated TextureAsset textures = 6; // 世界共享图像资源目录，由对象引用。
+  repeated MeshAsset meshes = 7; // 世界共享原语及导入几何目录，由对象引用。
+  optional string default_scene_id = 8; // 打开文档时默认激活的场景标识。
+}

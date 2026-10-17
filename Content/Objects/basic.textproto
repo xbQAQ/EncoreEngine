@@ -1,0 +1,32 @@
+# 编辑器对象库使用普通世界文档；这些对象只提供模板，不直接实例化到用户场景。
+format_version: 1
+id: "editor.preset.library"
+name: "基础对象"
+default_scene_id: "editor.preset.scene"
+materials {
+  id: "editor.preset.material.neutral"
+  name: "基础中性材质"
+  parameters { base_roughness { x: 0.65 y: 0.67 z: 0.7 w: 0.6 } }
+}
+# 盒体原点位于底面中心，平面位于 XZ 面且按正 Y 法线排列顶点。
+meshes { id: "editor.preset.mesh.cube" name: "单位立方体" box { size { x: 1 y: 1 z: 1 } } }
+meshes {
+  id: "editor.preset.mesh.plane" name: "单位平面"
+  quad {
+    a { x: -0.5 z: -0.5 } b { x: -0.5 z: 0.5 }
+    c { x: 0.5 z: 0.5 } d { x: 0.5 z: -0.5 }
+  }
+}
+levels {
+  id: "editor.preset.level" name: "对象模板"
+  scenes {
+    id: "editor.preset.scene" name: "基础对象"
+    objects { id: "editor.preset.cube" name: "立方体" mesh_id: "editor.preset.mesh.cube" material_id: "editor.preset.material.neutral" }
+    objects { id: "editor.preset.plane" name: "平面" mesh_id: "editor.preset.mesh.plane" material_id: "editor.preset.material.neutral" }
+    objects { id: "editor.preset.directional" name: "方向光" light { type: DIRECTIONAL intensity: 3 color { x: 1 y: 1 z: 1 } range: 0 source_radius: 0.01 } }
+    objects { id: "editor.preset.point" name: "点光源" light { type: POINT intensity: 20 color { x: 1 y: 1 z: 1 } range: 10 source_radius: 0.05 } }
+    objects { id: "editor.preset.spot" name: "聚光灯" light { type: SPOT intensity: 30 color { x: 1 y: 1 z: 1 } range: 10 inner_angle_degrees: 25 outer_angle_degrees: 40 } }
+    objects { id: "editor.preset.rectangle" name: "矩形光" light { type: RECTANGLE intensity: 15 color { x: 1 y: 1 z: 1 } width: 1 height: 1 } }
+    objects { id: "editor.preset.disk" name: "圆盘光" light { type: DISK intensity: 15 color { x: 1 y: 1 z: 1 } width: 1 height: 1 } }
+  }
+}
